@@ -659,12 +659,12 @@ func (g *generateServiceEndpoints) generateEndpointsClientMethods() {
 			rt = append(rt, jen.Id(p.Name))
 			resList = append(
 				resList,
-				jen.Id(rpName).Dot("").Call(jen.Id(m.Name+"Response")).Dot(utils.ToCamelCase(p.Name)),
+				jen.Id(rpName).Dot("").Call(jen.Id("*"+m.Name+"Response")).Dot(utils.ToCamelCase(p.Name)),
 			)
 		}
 
 		body := []jen.Code{
-			jen.Id(rqName).Op(":=").Id(m.Name + "Request").Values(req),
+			jen.Id(rqName).Op(":=").Id("&" + m.Name + "Request").Values(req),
 			jen.List(jen.Id(rpName), jen.Err()).Op(":=").Id(stp).Dot(m.Name + "Endpoint").Call(
 				jen.List(jen.Id(ctxN), jen.Id(rqName)),
 			),
@@ -812,10 +812,10 @@ func (g *generateServiceEndpoints) generateMethodEndpoint() (err error) {
 			pt := NewPartialGenerator(nil)
 			bd := []jen.Code{
 				jen.Id("req").Op(":=").Id("request").Dot("").Call(
-					jen.Id(m.Name + "Request"),
+					jen.Id("*" + m.Name + "Request"),
 				),
 				jen.List(retList...).Op(":=").Id("s").Dot(m.Name).Call(mCallParam...),
-				jen.Return(jen.Id(m.Name+"Response").Values(respParam), jen.Nil()),
+				jen.Return(jen.Id("&"+m.Name+"Response").Values(respParam), jen.Nil()),
 			}
 			if len(mCallParam) == 1 {
 				bd = bd[1:]
