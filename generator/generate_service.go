@@ -95,6 +95,13 @@ func (g *GenerateService) Generate() (err error) {
 	g.generateNewBasicStructMethod()
 	g.generateNewMethod()
 	svcSrc += "\n" + g.pg.String()
+
+	// Expose where error location is.
+	defer func() {
+		if err != nil {
+			panic(err)
+		}
+	}()
 	s, err := utils.GoImportsSource(g.destPath, svcSrc)
 	if err != nil {
 		return err

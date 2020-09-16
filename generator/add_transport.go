@@ -92,6 +92,13 @@ func (g *GenerateTransport) Generate() (err error) {
 	if len(g.serviceInterface.Methods) == 0 {
 		return errors.New("the service has no suitable methods please implement the interface methods")
 	}
+
+	// Expose where error location is.
+	defer func() {
+		if err != nil {
+			panic(err)
+		}
+	}()
 	switch g.transport {
 	case "http":
 		tG := newGenerateHTTPTransport(g.name, g.gorillaMux, g.serviceInterface, g.methods)
@@ -659,7 +666,9 @@ func newGenerateGRPCTransportProto(name, pbPath string, serviceInterface parser.
 		serviceInterface: serviceInterface,
 	}
 	if pbPath != "" {
-		t.destPath = path.Join(pbPath, "pb")
+		// t.destPath = path.Join(pbPath, "pb")
+		// From now on, we use directly `pbPath` as the path to store *.proto files, instead of ${pbPath}/pb
+		t.destPath = pbPath
 	}
 	t.pbFilePath = path.Join(
 		t.destPath,

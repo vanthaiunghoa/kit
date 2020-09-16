@@ -30,7 +30,7 @@ var initserviceCmd = &cobra.Command{
 		if pbPath != "" {
 			exist := utils.IsExist(pbPath)
 			if !exist {
-				logrus.Errorf("You must provide a existed pb path to put pb dir, given path:<%s> does not exist", pbPath)
+				logrus.Errorf("You must provide a existed path to store *.proto files, given path:<%s> does not exist", pbPath)
 				return
 			}
 			// The pbImportPath validity is not checked here, and it is the responsibility of the developer
@@ -67,7 +67,7 @@ var initserviceCmd = &cobra.Command{
 func init() {
 	generateCmd.AddCommand(initserviceCmd)
 	initserviceCmd.Flags().StringP("transport", "t", "http", "The transport you want your service to be initiated with")
-	initserviceCmd.Flags().StringP("pb_path", "p", "", "Specify path to store pb dir")
+	initserviceCmd.Flags().StringP("pb_path", "p", "", "Specify path to store *.proto file dir")
 	initserviceCmd.Flags().StringP("pb_import_path", "i", "", "Specify path to import pb")
 	initserviceCmd.Flags().BoolP("dmw", "w", false, "Generate default middleware for service and endpoint")
 	initserviceCmd.Flags().Bool("gorilla", false, "Generate http using gorilla mux")
