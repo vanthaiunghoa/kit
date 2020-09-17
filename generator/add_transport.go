@@ -2,14 +2,13 @@ package generator
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"bytes"
-
-	"os/exec"
-
-	"os"
 
 	"runtime"
 
@@ -670,6 +669,7 @@ func newGenerateGRPCTransportProto(name, pbPath string, serviceInterface parser.
 		// From now on, we use directly `pbPath` as the path to store *.proto files, instead of ${pbPath}/pb
 		t.destPath = pbPath
 	}
+
 	t.pbFilePath = path.Join(
 		t.destPath,
 		fmt.Sprintf(viper.GetString("gk_grpc_pb_file_name"), utils.ToLowerSnakeCase(name)),
@@ -679,6 +679,12 @@ func newGenerateGRPCTransportProto(name, pbPath string, serviceInterface parser.
 	return t
 }
 func (g *generateGRPCTransportProto) Generate() (err error) {
+	defer func() {
+		if err != nil {
+			// We have to panic here to expose the location of the error stack.
+			panic(err)
+		}
+	}()
 	g.CreateFolderStructure(g.destPath)
 	if b, err := g.fs.Exists(g.pbFilePath); err != nil {
 		return err
@@ -728,7 +734,7 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 	}
 	g.generateRequestResponse()
 	buf := new(bytes.Buffer)
-	formatter := protofmt.NewFormatter(buf, " ")
+	formatter := protofmt.NewFormatter(buf, "	  ")
 	formatter.Format(g.protoSrc)
 	err = g.fs.WriteFile(g.pbFilePath, buf.String(), true)
 	if err != nil {
@@ -737,20 +743,57 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 	if viper.GetString("gk_folder") != "" {
 		g.pbFilePath = path.Join(viper.GetString("gk_folder"), g.pbFilePath)
 	}
-	if !viper.GetBool("gk_testing") {
+
+	if b, e := g.fs.Exists(g.compileFilePath); e != nil {
+		return e
+	} else if !b && !viper.GetBool("gk_testing") {
 		cmd := exec.Command("protoc", g.pbFilePath, "--go_out=plugins=grpc:.")
 		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Run()
 		err = cmd.Run()
 		if err != nil {
 			return err
 		}
-	}
-	if b, e := g.fs.Exists(g.compileFilePath); e != nil {
-		return e
-	} else if b {
+	} else {
+		/*
+			If expected script is existed, we execute it.
+		*/
+		if g.compileFilePath, err = filepath.Abs(g.compileFilePath); err != nil {
+			return err
+		}
+		if err = utils.CanScriptExecRightly(g.compileFilePath); err != nil {
+			return err
+		}
+
+		// There is no need to check err here, It's done within utils.CanScriptExecRightly.
+		scriptInter, _ := utils.GetScriptInterpreter(g.compileFilePath)
+
+		logrus.Infof("exec>%s", g.compileFilePath)
+
+		// Change dir firstly.
+		if err = os.Chdir(g.destPath); err != nil {
+			return err
+		}
+
+		var cmd *exec.Cmd
+		if scriptInter == utils.InterpreterCmd {
+			// For windows.
+			cmd = exec.Command("cmd", "/c", g.compileFilePath)
+		} else {
+			// For unix-like systems.
+			cmd = exec.Command(scriptInter, "-c", utils.ConvertToUnixPath(g.compileFilePath))
+		}
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
+		if err != nil {
+			return
+		}
 		return
 	}
 
+	// Not found compile file, we generate it.
 	if runtime.GOOS == "windows" {
 		return g.fs.WriteFile(
 			g.compileFilePath,
