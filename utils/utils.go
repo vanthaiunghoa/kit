@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"bufio"
+	"github.com/sirupsen/logrus"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -213,4 +216,109 @@ func getModNameFromModFile(name string) (string, error) {
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)
+}
+
+const (
+	InterpreterBash = "bash"
+	InterpreterSh   = "sh"
+	InterpreterCmd  = "cmd"
+)
+
+func GetScriptInterpreter(_filepath string) (string, error) {
+	absP, err := filepath.Abs(_filepath)
+	if err != nil {
+		return "", fmt.Errorf("utils.go: get absolutely path err:%v -->[%s]", err, _filepath)
+	}
+
+	if filepath.Ext(absP) == ".bat" {
+		return InterpreterCmd, nil
+	}
+
+	fileInfo, _ := os.Stat(absP)
+	if fileInfo.IsDir() {
+		return "", fmt.Errorf("utils.go: _filepath is a dir")
+	}
+
+	f, _ := os.Open(absP)
+	rd := bufio.NewReader(f)
+	if line, err := rd.ReadString('\n'); err != nil {
+		return "", fmt.Errorf("utils.go: read first line err:%v -->[%s]", err, _filepath)
+	} else {
+		line = strings.Trim(line, "\n")
+		line = strings.Trim(line, "\r\n")
+		line = strings.TrimRight(line, " ")
+
+		// First form: #!/usr/bin/env sh
+		s2 := strings.Split(line, " ")
+
+		// Second form: #!/bin/sh [or] #!/bin/bash
+		s1 := strings.Split(line, "/")
+
+		for _, ss := range [][]string{s1, s2} {
+			if s := validUnixInterpreter(ss[len(ss)-1]); s != "" {
+				return s, nil
+			}
+		}
+		return "", fmt.Errorf("utils.go: invalid first line for [%s], you have to be set a valid shell interpreter, like #!/bin/bash", _filepath)
+	}
+}
+
+func validUnixInterpreter(s string) string {
+	switch s {
+	case "bash":
+		return InterpreterBash
+	case "sh":
+		return InterpreterSh
+	}
+	return ""
+}
+
+func GetCurrShellInterpreter() []string {
+	shellSlice := []string{InterpreterBash, InterpreterSh, InterpreterCmd}
+
+	var (
+		err error
+		ret []string
+	)
+	for _, s := range shellSlice {
+		cmd := exec.Command(s)
+		if err = cmd.Run(); err == nil {
+			ret = append(ret, s)
+		} else {
+			logrus.Debugf("utils.go: we can't inspect what interpreter is on current env, err:%s", err)
+		}
+	}
+	return ret
+}
+
+func CanScriptExecRightly(_filepath string) error {
+	interpreterFromFile, err := GetScriptInterpreter(_filepath)
+	if err != nil {
+		return err
+	}
+
+	its := GetCurrShellInterpreter()
+	for _, it := range its {
+		if interpreterFromFile == it {
+			return nil
+		}
+	}
+	err = fmt.Errorf("utils.go: interpreter of existed script:%s is not be supported to current %+v", interpreterFromFile, its)
+	return err
+}
+
+func ConvertToUnixPath(_path string) string {
+	if _path == "" {
+		return ""
+	}
+	if !strings.Contains(_path, "\\") {
+		return _path
+	}
+
+	ss := strings.Split(_path, "\\")
+	if !strings.HasPrefix(ss[0], "/") {
+		ss[0] = "/" + ss[0]
+		ss[0] = strings.TrimRight(ss[0], ":")
+	}
+	return strings.Join(ss, "/")
 }
