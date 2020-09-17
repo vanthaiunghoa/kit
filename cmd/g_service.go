@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"path/filepath"
 )
 
 var methods []string
@@ -28,6 +29,12 @@ var initserviceCmd = &cobra.Command{
 		pbPath = viper.GetString("g_s_pb_path")
 		pbImportPath = viper.GetString("g_s_pb_import_path")
 		if pbPath != "" {
+			pp, err := filepath.Abs(pbPath)
+			if err != nil {
+				logrus.Errorf("we can't get absolute path of pbPath:%s err:%s", pbPath, err)
+				return
+			}
+			pbPath = pp
 			exist := utils.IsExist(pbPath)
 			if !exist {
 				logrus.Errorf("You must provide a existed path to store *.proto files, given path:<%s> does not exist", pbPath)
