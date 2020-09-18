@@ -41,13 +41,13 @@ time="2020-09-18T10:23:36+08:00" level=warning msg="You also need to implement t
 time="2020-09-18T10:23:36+08:00" level=warning msg="==============================================================="
 ```
 
-With here, `-p` set proto file path, `-i` set imporp path of pb file.
+With here, `-p` set proto file path, `-i` set import path of pb file.
 If you haven't change default proto file path via `-p`, there is no need to set `-i` too.
 
 It can be checked in `pkg/grpc/handler.go`.
 
 
-There is one more thing need to note, When after you modified proto option `go_package` with a more detailed path, 
+There is one more thing need to note, after you modified proto option `go_package` with a more detailed path, 
 like `go_package="hello/pb;pb"`, since it is full go pkg path startswith project root dir, 
 so you also need modify `compile.sh` like following:
 
@@ -59,14 +59,13 @@ protoc hello.proto --go_out=plugins=grpc:.
 protoc hello.proto --go_out=plugins=grpc:../../
 ```
 
-Otherwise, The location of the generated pb file will be out of order.  
-This is just a path issue.
+Otherwise, The location of the generated pb file will be out of order, this is just a path issue.
 
 ## 3. Add a new proto file
 
 We add a new proto file now:
 ```bash
-$vi common.proto
+$vi hello/pb/common.proto
 syntax = "proto3";
 package pb;
 
@@ -94,7 +93,7 @@ message FooRequest {
 message FooReply {}
 ```
 
-Because now add a new proto file, we need modify `compile.sh`:
+Because we added a new proto file, we need modify `compile.sh`:
 ```bashtext
 // old
 protoc hello.proto --go_out=plugins=grpc:.
@@ -104,7 +103,7 @@ protoc *.proto --go_out=plugins=grpc:../../
 ```
 
 If you want to execute `compile.bat` script with a subfolder stored more proto
-files on Cmd(windows), see also `hello/pb/compile.bat` example. 
+files on Cmd(windows), see also example `hello/pb/compile.bat`
 
 
 ## 4. Run it
