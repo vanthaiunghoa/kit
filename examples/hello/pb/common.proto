@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package pb;
+
+
+option go_package = "hello/pb;pb";
+
+
+message BaseReq {
+	string token=1;
+}
