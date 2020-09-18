@@ -143,7 +143,7 @@ After you run `docker-compose up` your services will start up and any change you
 # Read env conf
 We support read environment vars as config, see following:
 
-|  Env Name   | Default Value  |
+|  Name   | Default Value  |
 |  :----:  | :----:  |
 | KIT_PROTO_FILE_INDENT_CHAR  | $four space$ |
 
