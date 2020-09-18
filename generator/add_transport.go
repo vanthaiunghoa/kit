@@ -111,7 +111,7 @@ func (g *GenerateTransport) Generate() (err error) {
 			return err
 		}
 	case "grpc":
-		gp := newGenerateGRPCTransportProto(g.name, g.pbPath, g.serviceInterface, g.methods)
+		gp := newGenerateGRPCTransportProto(g.name, g.pbPath, g.pbImportPath, g.serviceInterface, g.methods)
 		err = gp.Generate()
 		if err != nil {
 			return err
@@ -652,11 +652,12 @@ type generateGRPCTransportProto struct {
 	destPath          string
 	protoSrc          *proto.Proto
 	pbFilePath        string
+	protoOptionGoPkg  string
 	compileFilePath   string
 	serviceInterface  parser.Interface
 }
 
-func newGenerateGRPCTransportProto(name, pbPath string, serviceInterface parser.Interface, methods []string) Gen {
+func newGenerateGRPCTransportProto(name, pbPath, pbImportPath string, serviceInterface parser.Interface, methods []string) Gen {
 	t := &generateGRPCTransportProto{
 		name:             name,
 		methods:          methods,
@@ -669,7 +670,10 @@ func newGenerateGRPCTransportProto(name, pbPath string, serviceInterface parser.
 		// From now on, we use directly `pbPath` as the path to store *.proto files, instead of ${pbPath}/pb
 		t.destPath = pbPath
 	}
-
+	t.protoOptionGoPkg = "."
+	if pbImportPath != "" {
+		t.protoOptionGoPkg = pbImportPath
+	}
 	t.pbFilePath = path.Join(
 		t.destPath,
 		fmt.Sprintf(viper.GetString("gk_grpc_pb_file_name"), utils.ToLowerSnakeCase(name)),
@@ -722,6 +726,10 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 			&proto.Package{
 				Name: "pb",
 			},
+			&proto.Option{
+				Name:     "go_package",
+				Constant: proto.Literal{Source: fmt.Sprintf(`"%s;pb"`, g.protoOptionGoPkg)},
+			},
 			svc,
 		)
 	} else {
@@ -747,10 +755,15 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 	if b, e := g.fs.Exists(g.compileFilePath); e != nil {
 		return e
 	} else if !b && !viper.GetBool("gk_testing") {
-		cmd := exec.Command("protoc", g.pbFilePath, "--go_out=plugins=grpc:.")
+		if !g.generateFirstTime {
+			logrus.Info("We detected that the proto file already exists, " +
+				"you need manually create compile script with current shell interpreter and run again. -- e.g. windows-cmd would be compile.bat")
+			print("\n")
+			return nil
+		}
+		cmd := exec.Command("protoc", g.pbFilePath, "--go_opt=paths=source_relative", "--go_out=plugins=grpc:.")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		cmd.Run()
 		err = cmd.Run()
 		if err != nil {
 			return err
@@ -771,10 +784,15 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 
 		logrus.Infof("exec>%s", g.compileFilePath)
 
+		currDir, _ := os.Getwd()
+
 		// Change dir firstly.
 		if err = os.Chdir(g.destPath); err != nil {
 			return err
 		}
+		defer func() {
+			_ = os.Chdir(currDir)
+		}()
 
 		var cmd *exec.Cmd
 		if scriptInter == utils.InterpreterCmd {
@@ -793,28 +811,16 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 		return
 	}
 
-	// Not found compile file, we generate it.
-	if runtime.GOOS == "windows" {
-		return g.fs.WriteFile(
-			g.compileFilePath,
-			fmt.Sprintf(`:: Install proto3.
-:: https://github.com/google/protobuf/releases
-:: Update protoc Go bindings via
-::  go get -u github.com/golang/protobuf/proto
-::  go get -u github.com/golang/protobuf/protoc-gen-go
-::
-:: See also
-::  https://github.com/grpc/grpc-go/tree/master/examples
-
-protoc %s.proto --go_out=plugins=grpc:.`, g.name),
-			false,
-		)
-	}
-	if runtime.GOOS == "darwin" {
-		return g.fs.WriteFile(
-			g.compileFilePath,
-			fmt.Sprintf(`#!/usr/bin/env sh
-
+	its := utils.GetCurrShellInterpreter()
+	if len(its) == 0 {
+		panic("unknown interpreter, open debug mode with -d")
+	} else {
+		switch its[0] {
+		case utils.InterpreterBash, utils.InterpreterSh:
+			if runtime.GOOS == "darwin" {
+				return g.fs.WriteFile(
+					g.compileFilePath,
+					fmt.Sprintf(`#!/usr/bin/env sh
 # Install proto3 from source macOS only.
 #  brew install autoconf automake libtool
 #  git clone https://github.com/google/protobuf
@@ -827,13 +833,12 @@ protoc %s.proto --go_out=plugins=grpc:.`, g.name),
 #  https://github.com/grpc/grpc-go/tree/master/examples
 
 protoc %s.proto --go_out=plugins=grpc:.`, g.name),
-			false,
-		)
-	}
-	return g.fs.WriteFile(
-		g.compileFilePath,
-		fmt.Sprintf(`#!/usr/bin/env sh
-
+					false,
+				)
+			}
+			return g.fs.WriteFile(
+				g.compileFilePath,
+				fmt.Sprintf(`#!/usr/bin/env sh
 # Install proto3
 # sudo apt-get install -y git autoconf automake libtool curl make g++ unzip
 # git clone https://github.com/google/protobuf.git
@@ -852,8 +857,28 @@ protoc %s.proto --go_out=plugins=grpc:.`, g.name),
 #  https://github.com/grpc/grpc-go/tree/master/examples
 
 protoc %s.proto --go_out=plugins=grpc:.`, g.name),
-		false,
-	)
+				false,
+			)
+
+		case utils.InterpreterCmd:
+			return g.fs.WriteFile(
+				g.compileFilePath,
+				fmt.Sprintf(`:: Install proto3.
+:: https://github.com/google/protobuf/releases
+:: Update protoc Go bindings via
+::  go get -u github.com/golang/protobuf/proto
+::  go get -u github.com/golang/protobuf/protoc-gen-go
+::
+:: See also
+::  https://github.com/grpc/grpc-go/tree/master/examples
+
+protoc %s.proto --go_out=plugins=grpc:.`, g.name),
+				false,
+			)
+		default:
+			panic(fmt.Sprintf("unknown interpreter:%s, open debug mode with -d", its[0]))
+		}
+	}
 }
 func (g *generateGRPCTransportProto) getService() *proto.Service {
 	for i, e := range g.protoSrc.Elements {
