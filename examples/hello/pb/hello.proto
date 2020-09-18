@@ -8,11 +8,11 @@ option go_package = "hello/pb;pb";
 
 //The Hello service definition.
 service Hello {
-	  rpc Foo (FooRequest) returns (FooReply);
+    rpc Foo (FooRequest) returns (FooReply);
 }
 
 message FooRequest {
-	  BaseReq base_req = 1;
+    BaseReq base_req = 1;
 }
 
 message FooReply {}
