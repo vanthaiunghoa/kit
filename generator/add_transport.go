@@ -742,7 +742,7 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 	}
 	g.generateRequestResponse()
 	buf := new(bytes.Buffer)
-	formatter := protofmt.NewFormatter(buf, "	  ")
+	formatter := protofmt.NewFormatter(buf, getProtoFileIndentChar())
 	formatter.Format(g.protoSrc)
 	err = g.fs.WriteFile(g.pbFilePath, buf.String(), true)
 	if err != nil {
