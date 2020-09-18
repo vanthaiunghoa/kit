@@ -139,3 +139,12 @@ docker-compose up
 
 After you run `docker-compose up` your services will start up and any change you make to your code will automatically
  rebuild and restart your service (only the service that is changed)
+
+# Read env conf
+We support read environment vars as config, see following:
+
+|  Env Name   | Default Value  |
+|  :----:  | :----:  |
+| KIT_PROTO_FILE_INDENT_CHAR  | $four space$ |
+
+> Note: Set space to env value, it requires double quotation marks.
