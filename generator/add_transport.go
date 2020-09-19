@@ -701,8 +701,8 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 			return err
 		}
 		r := bytes.NewReader([]byte(src))
-		parser := proto.NewParser(r)
-		definition, err := parser.Parse()
+		_parser := proto.NewParser(r)
+		definition, err := _parser.Parse()
 		g.protoSrc = definition
 		if err != nil {
 			return err
@@ -1169,7 +1169,7 @@ func (g *generateGRPCTransport) Generate() (err error) {
 				nil,
 				[]jen.Code{
 					jen.Id("_").Qual("context", "Context"),
-					jen.Id("r").Interface(),
+					jen.Id("req").Interface(),
 				},
 				[]jen.Code{
 					jen.Interface(),
@@ -1196,7 +1196,7 @@ func (g *generateGRPCTransport) Generate() (err error) {
 				nil,
 				[]jen.Code{
 					jen.Id("_").Qual("context", "Context"),
-					jen.Id("r").Interface(),
+					jen.Id("rsp").Interface(),
 				},
 				[]jen.Code{
 					jen.Interface(),
