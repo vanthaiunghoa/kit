@@ -3,7 +3,7 @@ package grpc
 
 import (
 	grpc "github.com/go-kit/kit/transport/grpc"
-	pb "hello/pb"
+	pb "hello/pb/gen-go/pb"
 	endpoint "hello/pkg/endpoint"
 )
 

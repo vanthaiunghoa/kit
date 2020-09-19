@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package pb;
 
-import "common.proto";
+import "common/common.proto";
 
-option go_package = "hello/pb;pb";
+option go_package = "hello/pb/gen-go/pb;pb";
 
 //The Hello service definition.
 service Hello {

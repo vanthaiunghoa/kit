@@ -3,7 +3,7 @@ syntax = "proto3";
 package pb;
 
 
-option go_package = "hello/pb;pb";
+option go_package = "hello/pb/gen-go/common;common";
 
 
 message BaseReq {

@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 	"errors"
-	pb "hello/pb"
+	pb "hello/pb/gen-go/pb"
 	endpoint "hello/pkg/endpoint"
 
 	grpc "github.com/go-kit/kit/transport/grpc"

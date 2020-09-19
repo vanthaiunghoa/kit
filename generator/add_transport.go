@@ -782,8 +782,6 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 		// There is no need to check err here, It's done within utils.CanScriptExecRightly.
 		scriptInter, _ := utils.GetScriptInterpreter(g.compileFilePath)
 
-		logrus.Infof("exec>%s", g.compileFilePath)
-
 		currDir, _ := os.Getwd()
 
 		// Change dir firstly.
@@ -794,14 +792,20 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 			_ = os.Chdir(currDir)
 		}()
 
-		var cmd *exec.Cmd
+		var (
+			cmd      *exec.Cmd
+			cmdSlice []string
+		)
+
 		if scriptInter == utils.InterpreterCmd {
 			// For windows.
-			cmd = exec.Command("cmd", "/c", g.compileFilePath)
+			cmdSlice = append(cmdSlice, "cmd", "/c", g.compileFilePath)
 		} else {
 			// For unix-like systems.
-			cmd = exec.Command(scriptInter, "-c", utils.ConvertToUnixPath(g.compileFilePath))
+			cmdSlice = append(cmdSlice, scriptInter, "-c", utils.ConvertToUnixPath(g.compileFilePath))
 		}
+		logrus.Infof("exec>%v", cmdSlice)
+		cmd = exec.Command(cmdSlice[0], cmdSlice[1:]...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err = cmd.Run()
