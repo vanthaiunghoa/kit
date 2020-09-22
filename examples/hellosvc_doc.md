@@ -95,7 +95,7 @@ message BaseReq {
 ## 3. Separate proto files from `*.pb.go` files
 
 You may have noticed `option go_package` at `common.proto`, yes, we will put `.pb.go` files into 
-`proto/gen-go` dir, but no need to create it manually.
+`pb/gen-go` dir, but no need to create it manually.
 
 Now we modify the `option go_package` at `hello.proto`:
 ```proto
