@@ -192,12 +192,38 @@ func (fp *FileParser) parseFieldListAsNamedTypes(list *ast.FieldList) []NamedTyp
 			}
 			if len(names) == 0 {
 				// Anonymous named type, give it a default name
-				if strings.HasPrefix(typ, "[]") {
-					names = append(names, utils.ToLowerFirstCamelCase(typ[2:3]+fmt.Sprintf("%d", i)))
+				if strings.Contains(typ, "[]") {
+					firstCharIsStar := typ[0:1] == "*"
+					fourthCharIsStar := typ[3:4] == "*"
+					// four cases
+					if firstCharIsStar && fourthCharIsStar {
+						names = append(names, utils.ToLowerFirstCamelCase(typ[4:5]+fmt.Sprintf("%d", i)))
+					} else if firstCharIsStar && !fourthCharIsStar {
+						names = append(names, utils.ToLowerFirstCamelCase(typ[3:4]+fmt.Sprintf("%d", i)))
+					} else if !firstCharIsStar && fourthCharIsStar {
+						names = append(names, utils.ToLowerFirstCamelCase(typ[3:4]+fmt.Sprintf("%d", i)))
+					} else if !firstCharIsStar && !fourthCharIsStar {
+						names = append(names, utils.ToLowerFirstCamelCase(typ[2:3]+fmt.Sprintf("%d", i)))
+					}
 				} else if strings.HasPrefix(typ, "*") {
+					// smart naming
+					mm := map[string][]string{
+						"req": {"Req", "Request"},
+						"rsp": {"Rsp", "Resp", "Response"},
+					}
+					for needName, paramSuffixes := range mm {
+						for _, suff := range paramSuffixes {
+							if strings.HasSuffix(typ, suff) {
+								names = append(names, needName)
+								goto BREAK
+							}
+						}
+					}
 					names = append(names, utils.ToLowerFirstCamelCase(typ[1:2]+fmt.Sprintf("%d", i)))
+				BREAK:
 				} else {
 					names = append(names, utils.ToLowerFirstCamelCase(typ[:1]+fmt.Sprintf("%d", i)))
+					// Map as parameter is not considered here
 				}
 			}
 			for _, name := range names {
