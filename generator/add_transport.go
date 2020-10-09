@@ -779,7 +779,7 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 			return err
 		}
 
-		// There is no need to check err here, It's done within utils.CanScriptExecRightly.
+		// There is no need to check err here, It's done in utils.CanScriptExecRightly
 		scriptInter, _ := utils.GetScriptInterpreter(g.compileFilePath)
 
 		currDir, _ := os.Getwd()
@@ -903,7 +903,7 @@ func (g *generateGRPCTransportProto) generateRequestResponse() {
 				if r.Name == v.Name+"Request" {
 					foundRequest = true
 				}
-				if r.Name == v.Name+"Reply" {
+				if r.Name == v.Name+"Response" {
 					foundReply = true
 				}
 			}
@@ -915,7 +915,7 @@ func (g *generateGRPCTransportProto) generateRequestResponse() {
 		}
 		if !foundReply {
 			g.protoSrc.Elements = append(g.protoSrc.Elements, &proto.Message{
-				Name: v.Name + "Reply",
+				Name: v.Name + "Response",
 			})
 		}
 	}
@@ -936,7 +936,7 @@ func (g *generateGRPCTransportProto) getServiceRPC(svc *proto.Service) {
 		svc.Elements = append(svc.Elements,
 			&proto.RPC{
 				Name:        v.Name,
-				ReturnsType: v.Name + "Reply",
+				ReturnsType: v.Name + "Response",
 				RequestType: v.Name + "Request",
 			},
 		)
@@ -1164,8 +1164,9 @@ func (g *generateGRPCTransport) Generate() (err error) {
 				"TODO implement the decoder",
 			})
 			g.code.NewLine()
+			funcName := fmt.Sprintf("decode%sRequest", m.Name)
 			g.code.appendFunction(
-				fmt.Sprintf("decode%sRequest", m.Name),
+				funcName,
 				nil,
 				[]jen.Code{
 					jen.Id("_").Qual("context", "Context"),
@@ -1178,7 +1179,7 @@ func (g *generateGRPCTransport) Generate() (err error) {
 				"",
 				jen.Return(
 					jen.Nil(), jen.Qual("errors", "New").Call(
-						jen.Lit(fmt.Sprintf("'%s' Decoder is not impelemented", utils.ToCamelCase(g.name))),
+						jen.Lit(fmt.Sprintf("'%s' is not impelemented", funcName)),
 					),
 				),
 			)
@@ -1191,8 +1192,9 @@ func (g *generateGRPCTransport) Generate() (err error) {
 				"TODO implement the encoder",
 			})
 			g.code.NewLine()
+			funcName := fmt.Sprintf("encode%sResponse", m.Name)
 			g.code.appendFunction(
-				fmt.Sprintf("encode%sResponse", m.Name),
+				funcName,
 				nil,
 				[]jen.Code{
 					jen.Id("_").Qual("context", "Context"),
@@ -1205,7 +1207,7 @@ func (g *generateGRPCTransport) Generate() (err error) {
 				"",
 				jen.Return(
 					jen.Nil(), jen.Qual("errors", "New").Call(
-						jen.Lit(fmt.Sprintf("'%s' Encoder is not impelemented", utils.ToCamelCase(g.name))),
+						jen.Lit(fmt.Sprintf("'%s' is not impelemented", funcName)),
 					),
 				),
 			)
@@ -1222,7 +1224,7 @@ func (g *generateGRPCTransport) Generate() (err error) {
 					jen.Id("req").Id("*").Qual(pbImport, n+"Request"),
 				},
 				[]jen.Code{
-					jen.Id("*").Qual(pbImport, n+"Reply"),
+					jen.Id("*").Qual(pbImport, n+"Response"),
 					jen.Error(),
 				},
 				"",
@@ -1239,7 +1241,7 @@ func (g *generateGRPCTransport) Generate() (err error) {
 				),
 				jen.Return(
 					jen.Id("rep").Dot("").Call(
-						jen.Id("*").Qual(pbImport, n+"Reply"),
+						jen.Id("*").Qual(pbImport, n+"Response"),
 					),
 					jen.Nil(),
 				),

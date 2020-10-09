@@ -403,7 +403,7 @@ func (g *generateGRPCClient) Generate() (err error) {
 					jen.Lit(m.Name),
 					jen.Id(fmt.Sprintf("encode%sRequest", m.Name)),
 					jen.Id(fmt.Sprintf("decode%sResponse", m.Name)),
-					jen.Qual(pbImport, m.Name+"Reply").Block(),
+					jen.Qual(pbImport, m.Name+"Response").Block(),
 					jen.Id(fmt.Sprintf("options[\"%s\"]...", m.Name)),
 				).Dot("Endpoint").Call(),
 			).Line(),
@@ -478,7 +478,7 @@ func (g *generateGRPCClient) generateDecodeEncodeMethods(endpointImport string) 
 			nil,
 			[]jen.Code{
 				jen.Id("_").Qual("context", "Context"),
-				jen.Id("reply").Interface(),
+				jen.Id("response").Interface(),
 			},
 			[]jen.Code{
 				jen.Interface(),
