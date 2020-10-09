@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package pb;
+
+
+option go_package = "hello1009/pb/gen-go/pb;pb";
+
+//The Hello1009 service definition.
+service Hello1009 {
+    rpc Foo            (FooRequest           ) returns (FooResponse           );
+    rpc UpdateUserInfo (UpdateUserInfoRequest) returns (UpdateUserInfoResponse);
+}
+
+message FooRequest {}
+
+message FooResponse {}
+
+message UpdateUserInfoRequest {}
+
+message UpdateUserInfoResponse {}
+
