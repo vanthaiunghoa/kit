@@ -3,6 +3,7 @@ package generator
 import (
 	"fmt"
 	"go/ast"
+
 	ps "go/parser"
 	"go/token"
 	"strings"
@@ -13,10 +14,10 @@ import (
 	"go/format"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/kujtimiihoxha/kit/fs"
-	"github.com/kujtimiihoxha/kit/parser"
-	"github.com/kujtimiihoxha/kit/utils"
 	"github.com/sirupsen/logrus"
+	"kit/fs"
+	"kit/parser"
+	"kit/utils"
 )
 
 // Gen represents a generator.
@@ -170,7 +171,18 @@ func (b *BaseGenerator) AddImportsToFile(imp []parser.NamedTypeValue, src string
 		}
 		f.Decls = append([]ast.Decl{&dd}, f.Decls...)
 	}
+	defer func() {
+		if e := recover(); e != nil {
+			for _, ip := range imp {
+				logrus.Infof("========= import== %+v", ip)
+			}
 
+			logrus.Infof("========= src: >>>%s<<<", src)
+
+			logrus.Infof("========= fff: %+v", f)
+			panic(e)
+		}
+	}()
 	// Sort the imports
 	ast.SortImports(fset, f)
 	var buf bytes.Buffer

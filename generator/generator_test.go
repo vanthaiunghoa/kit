@@ -5,9 +5,9 @@ import (
 
 	"runtime"
 
-	"github.com/kujtimiihoxha/kit/parser"
-	"github.com/kujtimiihoxha/kit/utils"
 	"github.com/spf13/viper"
+	"kit/parser"
+	"kit/utils"
 )
 
 func setDefaults() {
