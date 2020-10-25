@@ -6,12 +6,12 @@ import (
 
 	"strings"
 
+	"github.com/chaseSpace/kit/fs"
+	"github.com/chaseSpace/kit/parser"
+	"github.com/chaseSpace/kit/utils"
 	"github.com/dave/jennifer/jen"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"kit/fs"
-	"kit/parser"
-	"kit/utils"
 )
 
 // GenerateMiddleware implements Gen and is used to generate middleware.

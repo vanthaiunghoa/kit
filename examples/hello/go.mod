@@ -6,7 +6,6 @@ require (
 	github.com/go-kit/kit v0.10.0
 	github.com/golang/protobuf v1.4.2
 	github.com/lightstep/lightstep-tracer-go v0.21.0
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/oklog/oklog v0.3.2
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.4.5

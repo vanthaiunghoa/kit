@@ -7,10 +7,10 @@ import (
 	"path"
 	"strings"
 
+	"github.com/chaseSpace/kit/fs"
+	"github.com/chaseSpace/kit/utils"
 	"github.com/dave/jennifer/jen"
 	"github.com/spf13/viper"
-	"kit/fs"
-	"kit/utils"
 )
 
 // NewService implements Gen and is used to create a new service.

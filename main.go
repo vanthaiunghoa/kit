@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/chaseSpace/kit/cmd"
+	"github.com/chaseSpace/kit/utils"
 	"github.com/spf13/viper"
-	"kit/cmd"
-	"kit/utils"
 	"path"
 )
 

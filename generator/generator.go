@@ -13,11 +13,11 @@ import (
 	"bytes"
 	"go/format"
 
+	"github.com/chaseSpace/kit/fs"
+	"github.com/chaseSpace/kit/parser"
+	"github.com/chaseSpace/kit/utils"
 	"github.com/dave/jennifer/jen"
 	"github.com/sirupsen/logrus"
-	"kit/fs"
-	"kit/parser"
-	"kit/utils"
 )
 
 // Gen represents a generator.

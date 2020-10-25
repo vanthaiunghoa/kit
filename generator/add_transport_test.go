@@ -4,10 +4,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/chaseSpace/kit/fs"
+	"github.com/chaseSpace/kit/parser"
 	"github.com/dave/jennifer/jen"
 	"github.com/emicklei/proto"
-	"kit/fs"
-	"kit/parser"
 )
 
 func TestNewGenerateTransport(t *testing.T) {
