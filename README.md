@@ -24,11 +24,8 @@ This is what `GoKit Cli` is aiming to change.
 # Installation
 Before you install please read [prerequisites](#prerequisites)
 ```bash
-git clone https://github.com/GrantZheng/kit.git
-cd kit
-go install 
+go get -u github.com/chaseSpace/kit
 ```
-:warning: **Notice**: to install package, do not use `go get github.com/GrantZheng/kit`, which could generate kit binary refers to the original repo code. Some methods have been discussed [here](https://stackoverflow.com/questions/54721986/issues-with-go-build-on-forked-repository)，but I haven't found a better way to solve this problem.
 
 # Usage
 ```bash
@@ -141,7 +138,7 @@ After you run `docker-compose up` your services will start up and any change you
  rebuild and restart your service (only the service that is changed)
 
 # Read env conf
-We support read environment vars as config, see following:
+We support read environment vars as config, see following table:
 
 |  Name   | Default Value  |
 |  :----:  | :----:  |
