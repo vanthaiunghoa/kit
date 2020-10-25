@@ -1900,24 +1900,26 @@ func (g *generateCmd) generateInitHTTP() (err error) {
 	pt.Raw().Id("httpHandler").Op(":=").Qual(httpImport, "NewHTTPHandler").Call(
 		jen.Id("endpoints"),
 		jen.Id("options"),
-	).Line()
+	).Line().Line()
 
-	pt.Raw().List(jen.Id("httpListener"), jen.Err()).Op(":=").Qual("net", "Listen").Call(
-		jen.Lit("tcp"),
-		jen.Id("*httpAddr"),
-	).Line()
-	pt.Raw().If(
-		jen.Err().Op("!=").Nil().Block(
-			jen.Id("logger").Dot("Log").Call(
-				jen.Lit("transport"),
-				jen.Lit("HTTP"),
-				jen.Lit("during"),
-				jen.Lit("Listen"),
-				jen.Lit("err"),
-				jen.Err(),
-			),
-		),
-	).Line()
+	pt.Raw().Var().Id("httpListener").Qual("net", "Listener").Line()
+	pt.Raw().Var().Err().Error().Line().Line()
+	//pt.Raw().List(jen.Id("httpListener"), jen.Err()).Op(":=").Qual("net", "Listen").Call(
+	//	jen.Lit("tcp"),
+	//	jen.Id("*httpAddr"),
+	//).Line()
+	//pt.Raw().If(
+	//	jen.Err().Op("!=").Nil().Block(
+	//		jen.Id("logger").Dot("Log").Call(
+	//			jen.Lit("transport"),
+	//			jen.Lit("HTTP"),
+	//			jen.Lit("during"),
+	//			jen.Lit("Listen"),
+	//			jen.Lit("err"),
+	//			jen.Err(),
+	//		),
+	//	),
+	//).Line()
 	pt.Raw().Id("g").Dot("Add").Call(
 		jen.Func().Params().Error().Block(
 			jen.Id("logger").Dot("Log").Call(
@@ -1926,6 +1928,13 @@ func (g *generateCmd) generateInitHTTP() (err error) {
 				jen.Lit("addr"),
 				jen.Id("*httpAddr"),
 			),
+			jen.List(jen.Id("httpListener"), jen.Err()).Op("=").Id("net").Dot("Listen").Call(
+				jen.Lit("tcp"),
+				jen.Id("*httpAddr"),
+			),
+			jen.If(jen.Err().Op("!=").Nil().Block(
+				jen.Return(jen.Err()),
+			)),
 			jen.Return(
 				jen.Qual("net/http", "Serve").Call(
 					jen.Id("httpListener"),
@@ -1934,7 +1943,9 @@ func (g *generateCmd) generateInitHTTP() (err error) {
 			),
 		),
 		jen.Func().Params(jen.Error()).Block(
-			jen.Id("httpListener").Dot("Close").Call(),
+			jen.If(jen.Id("httpListener").Op("!=").Nil().Block(
+				jen.Id("httpListener").Dot("Close").Call(),
+			)),
 		),
 	).Line()
 	g.code.NewLine()
@@ -1979,24 +1990,27 @@ func (g *generateCmd) generateInitGRPC() (err error) {
 	pt.Raw().Id("grpcServer").Op(":=").Qual(grpcImport, "NewGRPCServer").Call(
 		jen.Id("endpoints"),
 		jen.Id("options"),
-	).Line()
+	).Line().Line()
 
-	pt.Raw().List(jen.Id("grpcListener"), jen.Err()).Op(":=").Qual("net", "Listen").Call(
-		jen.Lit("tcp"),
-		jen.Id("*grpcAddr"),
-	).Line()
-	pt.Raw().If(
-		jen.Err().Op("!=").Nil().Block(
-			jen.Id("logger").Dot("Log").Call(
-				jen.Lit("transport"),
-				jen.Lit("gRPC"),
-				jen.Lit("during"),
-				jen.Lit("Listen"),
-				jen.Lit("err"),
-				jen.Err(),
-			),
-		),
-	).Line()
+	pt.Raw().Var().Id("grpcListener").Qual("net", "Listener").Line()
+	pt.Raw().Var().Err().Error().Line().Line()
+
+	//pt.Raw().List(jen.Id("grpcListener"), jen.Err()).Op(":=").Qual("net", "Listen").Call(
+	//	jen.Lit("tcp"),
+	//	jen.Id("*grpcAddr"),
+	//).Line()
+	//pt.Raw().If(
+	//	jen.Err().Op("!=").Nil().Block(
+	//		jen.Id("logger").Dot("Log").Call(
+	//			jen.Lit("transport"),
+	//			jen.Lit("gRPC"),
+	//			jen.Lit("during"),
+	//			jen.Lit("Listen"),
+	//			jen.Lit("err"),
+	//			jen.Err(),
+	//		),
+	//	),
+	//).Line()
 	pt.Raw().Id("g").Dot("Add").Call(
 		jen.Func().Params().Error().Block(
 			jen.Id("logger").Dot("Log").Call(
@@ -2005,6 +2019,13 @@ func (g *generateCmd) generateInitGRPC() (err error) {
 				jen.Lit("addr"),
 				jen.Id("*grpcAddr"),
 			),
+			jen.List(jen.Id("grpcListener"), jen.Err()).Op("=").Id("net").Dot("Listen").Call(
+				jen.Lit("tcp"),
+				jen.Id("*grpcAddr"),
+			),
+			jen.If(jen.Err().Op("!=").Nil().Block(
+				jen.Return(jen.Err()),
+			)),
 			jen.Id("baseServer").Op(":=").Qual("google.golang.org/grpc", "NewServer").Call(),
 			jen.Qual(pbImport, fmt.Sprintf("Register%sServer", utils.ToCamelCase(g.name))).Call(
 				jen.Id("baseServer"),
@@ -2017,7 +2038,9 @@ func (g *generateCmd) generateInitGRPC() (err error) {
 			),
 		),
 		jen.Func().Params(jen.Error()).Block(
-			jen.Id("grpcListener").Dot("Close").Call(),
+			jen.If(jen.Id("grpcListener").Op("!=").Nil().Block(
+				jen.Id("grpcListener").Dot("Close").Call(),
+			)),
 		),
 	).Line()
 	g.code.NewLine()
@@ -2132,23 +2155,25 @@ func (g *generateCmd) generateDefaultMetrics() {
 			jen.Qual("net/http", "DefaultServeMux").Dot("Handle").Call(
 				jen.Lit("/metrics"),
 				jen.Qual("github.com/prometheus/client_golang/prometheus/promhttp", "Handler").Call(),
-			),
-			jen.List(jen.Id("debugListener"), jen.Err()).Op(":=").Qual("net", "Listen").Call(
-				jen.Lit("tcp"),
-				jen.Id("*debugAddr"),
-			),
-			jen.If(
-				jen.Err().Op("!=").Nil().Block(
-					jen.Id("logger").Dot("Log").Call(
-						jen.Lit("transport"),
-						jen.Lit("debug/HTTP"),
-						jen.Lit("during"),
-						jen.Lit("Listen"),
-						jen.Lit("err"),
-						jen.Err(),
-					),
-				),
-			),
+			).Line(),
+			jen.Var().Id("debugListener").Qual("net", "Listener"),
+			jen.Var().Id("err").Error().Line(),
+			//jen.List(jen.Id("debugListener"), jen.Err()).Op(":=").Qual("net", "Listen").Call(
+			//	jen.Lit("tcp"),
+			//	jen.Id("*debugAddr"),
+			//),
+			//jen.If(
+			//	jen.Err().Op("!=").Nil().Block(
+			//		jen.Id("logger").Dot("Log").Call(
+			//			jen.Lit("transport"),
+			//			jen.Lit("debug/HTTP"),
+			//			jen.Lit("during"),
+			//			jen.Lit("Listen"),
+			//			jen.Lit("err"),
+			//			jen.Err(),
+			//		),
+			//	),
+			//),
 			jen.Id("g").Dot("Add").Call(
 				jen.Func().Params().Error().Block(
 					jen.Id("logger").Dot("Log").Call(
@@ -2157,6 +2182,13 @@ func (g *generateCmd) generateDefaultMetrics() {
 						jen.Lit("addr"),
 						jen.Id("*debugAddr"),
 					),
+					jen.List(jen.Id("debugListener"), jen.Err()).Op("=").Qual("net", "Listen").Call(
+						jen.Lit("tcp"),
+						jen.Id("*debugAddr"),
+					),
+					jen.If(jen.Err().Op("!=").Nil().Block(
+						jen.Return(jen.Err()),
+					)),
 					jen.Return(
 						jen.Qual("net/http", "Serve").Call(
 							jen.Id("debugListener"),
@@ -2165,7 +2197,9 @@ func (g *generateCmd) generateDefaultMetrics() {
 					),
 				),
 				jen.Func().Params(jen.Error()).Block(
-					jen.Id("debugListener").Dot("Close").Call(),
+					jen.If(jen.Id("debugListener").Op("!=").Nil().Block(
+						jen.Id("debugListener").Dot("Close").Call(),
+					)),
 				),
 			),
 		)
