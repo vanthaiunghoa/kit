@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -10,11 +11,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+const Version = "kit v1.0.3"
+
 // RootCmd is the root command of kit
 var RootCmd = &cobra.Command{
 	Use:   "kit",
 	Short: "Go-Kit CLI",
 	Run: func(cmd *cobra.Command, args []string) {
+		if viper.GetBool("gk_version") {
+			fmt.Fprintln(os.Stdout, Version)
+			return
+		}
 		cmd.Help()
 	},
 }
@@ -31,10 +38,12 @@ func init() {
 	RootCmd.PersistentFlags().BoolP("debug", "d", false, "If you want to see the debug logs.")
 	RootCmd.PersistentFlags().BoolP("force", "f", false, "Force override existing files without asking.")
 	RootCmd.PersistentFlags().StringP("folder", "b", "", "If you want to specify the base folder of the project.")
+	RootCmd.PersistentFlags().BoolP("version", "v", false, "version of kit.")
 
 	viper.BindPFlag("gk_folder", RootCmd.PersistentFlags().Lookup("folder"))
 	viper.BindPFlag("gk_force", RootCmd.PersistentFlags().Lookup("force"))
 	viper.BindPFlag("gk_debug", RootCmd.PersistentFlags().Lookup("debug"))
+	viper.BindPFlag("gk_version", RootCmd.PersistentFlags().Lookup("version"))
 }
 
 func checkProtoc() bool {
