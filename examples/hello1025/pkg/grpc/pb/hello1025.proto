@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pb;
+
+
+option go_package = ".;pb";
+
+//The Hello1025 service definition.
+service Hello1025 {
+    rpc Foo (FooRequest) returns (FooResponse);
+}
+
+message FooRequest {}
+
+message FooResponse {}
+
