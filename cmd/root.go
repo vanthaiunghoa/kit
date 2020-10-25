@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const Version = "kit v1.0.3"
+const Version = "kit v1.0.4"
 
 // RootCmd is the root command of kit
 var RootCmd = &cobra.Command{
