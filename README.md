@@ -86,6 +86,12 @@ You can run the service by running:
 go run hello/cmd/main.go
 ```
 
+✨ Specify location of generated pb dir with `-p` and `-i`:
+```bash
+kit g s hello -t grpc -p hello/pb -i hello/pb
+```
+About more details, see also hello example [doc](https://github.com/chaseSpace/kit/blob/master/examples/hellosvc_doc.md).
+
 # Generate the client library
 ```bash
 kit g c hello

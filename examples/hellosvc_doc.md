@@ -1,10 +1,10 @@
-# Practice generating microservice [hello]
+# A Practice for generate microservice [hello]
 
-It contained some features:
+It contains some features:
 
-- With gRPC transport
+- gRPC transport
 - Customize pb dir
-- import proto file
+- import proto file from other dir
 
 ## 1. Create a service
 ```bash
