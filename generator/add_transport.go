@@ -761,7 +761,7 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 			print("\n")
 			return nil
 		}
-		cmd := exec.Command("protoc", g.pbFilePath, "--go_opt=paths=source_relative", "--go_out=plugins=grpc:.")
+		cmd := exec.Command("protoc", g.pbFilePath, "--go-grpc_opt=paths=source_relative", "--go-grpc_out=.")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err = cmd.Run()
