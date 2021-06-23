@@ -836,7 +836,7 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 # See also
 #  https://github.com/grpc/grpc-go/tree/master/examples
 
-protoc %s.proto --go_out=plugins=grpc:.`, g.name),
+protoc %s.proto --go-grpc_out=. --go-grpc_opt=paths=source_relative`, g.name),
 					false,
 				)
 			}
@@ -860,7 +860,7 @@ protoc %s.proto --go_out=plugins=grpc:.`, g.name),
 # See also
 #  https://github.com/grpc/grpc-go/tree/master/examples
 
-protoc %s.proto --go_out=plugins=grpc:.`, g.name),
+protoc %s.proto --go-grpc_out=. --go-grpc_opt=paths=source_relative`, g.name),
 				false,
 			)
 
@@ -876,7 +876,7 @@ protoc %s.proto --go_out=plugins=grpc:.`, g.name),
 :: See also
 ::  https://github.com/grpc/grpc-go/tree/master/examples
 
-protoc %s.proto --go_out=plugins=grpc:.`, g.name),
+protoc %s.proto --go-grpc_out=. --go-grpc_opt=paths=source_relative`, g.name),
 				false,
 			)
 		default:
