@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/chaseSpace/kit/cmd"
-	"github.com/chaseSpace/kit/utils"
+	"runtime"
 	"github.com/spf13/viper"
 	"path"
 )
@@ -39,18 +39,12 @@ func setDefaults() {
 	viper.SetDefault("gk_grpc_pb_file_name", "%s.proto")
 	viper.SetDefault("gk_grpc_base_file_name", "handler_gen.go")
 	viper.SetDefault("gk_grpc_file_name", "handler.go")
-
+	
 	// Check the current shell interpreter intelligently, instead of by runtime.GOOS
-	its := utils.GetCurrShellInterpreter()
-	if len(its) == 0 {
-		panic("unknown interpreter, open debug mode with -d")
+	if runtime.GOOS == "windows" {
+		viper.SetDefault("gk_grpc_compile_file_name", "compile.bat")
 	} else {
-		switch its[0] {
-		case utils.InterpreterBash, utils.InterpreterSh:
-			viper.SetDefault("gk_grpc_compile_file_name", "compile.sh")
-		case utils.InterpreterCmd:
-			viper.SetDefault("gk_grpc_compile_file_name", "compile.bat")
-		}
+		viper.SetDefault("gk_grpc_compile_file_name", "compile.sh")
 	}
 
 	viper.SetDefault("gk_service_struct_prefix", "basic")
