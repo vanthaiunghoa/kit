@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"kit/generator"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/vanthaiunghoa/kit/generator"
 )
 
 // clientCmd represents the client command
