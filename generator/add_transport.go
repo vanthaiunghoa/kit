@@ -815,16 +815,25 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 		return
 	}
 
-	its := utils.GetCurrShellInterpreter()
-	if len(its) == 0 {
-		panic("unknown interpreter, open debug mode with -d")
-	} else {
-		switch its[0] {
-		case utils.InterpreterBash, utils.InterpreterSh:
-			if runtime.GOOS == "darwin" {
-				return g.fs.WriteFile(
-					g.compileFilePath,
-					fmt.Sprintf(`#!/usr/bin/env sh
+	if runtime.GOOS == "windows" {
+		return g.fs.WriteFile(
+			g.compileFilePath,
+			fmt.Sprintf(`:: Install proto3.
+:: https://github.com/google/protobuf/releases
+:: Update protoc Go bindings via
+::  go get -u github.com/golang/protobuf/proto
+::  go get -u github.com/golang/protobuf/protoc-gen-go
+::
+:: See also
+::  https://github.com/grpc/grpc-go/tree/master/examples
+protoc %s.proto --go_out=plugins=grpc:.`, g.name),
+			false,
+		)
+	}
+	if runtime.GOOS == "darwin" {
+		return g.fs.WriteFile(
+			g.compileFilePath,
+			fmt.Sprintf(`#!/usr/bin/env sh
 # Install proto3 from source macOS only.
 #  brew install autoconf automake libtool
 #  git clone https://github.com/google/protobuf
@@ -835,14 +844,13 @@ func (g *generateGRPCTransportProto) Generate() (err error) {
 #
 # See also
 #  https://github.com/grpc/grpc-go/tree/master/examples
-
 protoc %s.proto --go-grpc_out=. --go-grpc_opt=paths=source_relative`, g.name),
-					false,
-				)
-			}
-			return g.fs.WriteFile(
-				g.compileFilePath,
-				fmt.Sprintf(`#!/usr/bin/env sh
+			false,
+		)
+	}
+	return g.fs.WriteFile(
+		g.compileFilePath,
+		fmt.Sprintf(`#!/usr/bin/env sh
 # Install proto3
 # sudo apt-get install -y git autoconf automake libtool curl make g++ unzip
 # git clone https://github.com/google/protobuf.git
@@ -859,31 +867,11 @@ protoc %s.proto --go-grpc_out=. --go-grpc_opt=paths=source_relative`, g.name),
 #
 # See also
 #  https://github.com/grpc/grpc-go/tree/master/examples
-
 protoc %s.proto --go-grpc_out=. --go-grpc_opt=paths=source_relative`, g.name),
-				false,
-			)
-
-		case utils.InterpreterCmd:
-			return g.fs.WriteFile(
-				g.compileFilePath,
-				fmt.Sprintf(`:: Install proto3.
-:: https://github.com/google/protobuf/releases
-:: Update protoc Go bindings via
-::  go get -u github.com/golang/protobuf/proto
-::  go get -u github.com/golang/protobuf/protoc-gen-go
-::
-:: See also
-::  https://github.com/grpc/grpc-go/tree/master/examples
-
-protoc %s.proto --go-grpc_out=. --go-grpc_opt=paths=source_relative`, g.name),
-				false,
-			)
-		default:
-			panic(fmt.Sprintf("unknown interpreter:%s, open debug mode with -d", its[0]))
-		}
-	}
+		false,
+	)
 }
+
 func (g *generateGRPCTransportProto) getService() *proto.Service {
 	for i, e := range g.protoSrc.Elements {
 		if r, ok := e.(*proto.Service); ok {
