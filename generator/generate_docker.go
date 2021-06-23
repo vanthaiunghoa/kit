@@ -8,10 +8,10 @@ import (
 
 	"strings"
 
-	"github.com/chaseSpace/kit/fs"
-	"github.com/chaseSpace/kit/utils"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
+	"github.com/vanthaiunghoa/kit/fs"
+	"github.com/vanthaiunghoa/kit/utils"
 )
 
 // GenerateDocker implements Gen and is used to generate
@@ -133,6 +133,8 @@ RUN mkdir -p %s
 
 ADD . %s
 
+WORKDIR %s
+
 RUN go get  -t -v ./...
 RUN go get  github.com/canthefason/go-watcher
 RUN go install github.com/canthefason/go-watcher/cmd/watcher
@@ -145,6 +147,8 @@ ENTRYPOINT  watcher -run %s/%s/cmd  -watch %s/%s
 RUN mkdir -p %s
 
 ADD . %s
+
+WORKDIR %s
 
 RUN curl https://glide.sh/get | sh
 RUN go get  github.com/canthefason/go-watcher

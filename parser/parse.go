@@ -9,8 +9,8 @@ import (
 	"go/token"
 	"strings"
 
-	"github.com/chaseSpace/kit/utils"
 	"github.com/sirupsen/logrus"
+	"github.com/vanthaiunghoa/kit/utils"
 )
 
 // FileParser is the parser used by kit to parse go files.

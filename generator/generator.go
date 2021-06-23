@@ -13,11 +13,11 @@ import (
 	"bytes"
 	"go/format"
 
-	"github.com/chaseSpace/kit/fs"
-	"github.com/chaseSpace/kit/parser"
-	"github.com/chaseSpace/kit/utils"
 	"github.com/dave/jennifer/jen"
 	"github.com/sirupsen/logrus"
+	"github.com/vanthaiunghoa/kit/fs"
+	"github.com/vanthaiunghoa/kit/parser"
+	"github.com/vanthaiunghoa/kit/utils"
 )
 
 // Gen represents a generator.
@@ -88,7 +88,7 @@ func (b *BaseGenerator) GenerateNameBySample(sample string, exclude []parser.Nam
 		if v.Name == name {
 			sn++
 			if sn > len(sample) {
-				sample = string(len(sample) - sn)
+				sample = string(rune(len(sample) - sn))
 			}
 			name = utils.ToLowerFirstCamelCase(sample)[:sn]
 		}

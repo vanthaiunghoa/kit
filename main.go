@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/chaseSpace/kit/cmd"
-	"runtime"
-	"github.com/spf13/viper"
 	"path"
+	"runtime"
+
+	"github.com/spf13/viper"
+	"github.com/vanthaiunghoa/kit/cmd"
 )
 
 func main() {
@@ -39,7 +40,7 @@ func setDefaults() {
 	viper.SetDefault("gk_grpc_pb_file_name", "%s.proto")
 	viper.SetDefault("gk_grpc_base_file_name", "handler_gen.go")
 	viper.SetDefault("gk_grpc_file_name", "handler.go")
-	
+
 	// Check the current shell interpreter intelligently, instead of by runtime.GOOS
 	if runtime.GOOS == "windows" {
 		viper.SetDefault("gk_grpc_compile_file_name", "compile.bat")

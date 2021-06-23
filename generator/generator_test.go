@@ -5,9 +5,9 @@ import (
 
 	"runtime"
 
-	"github.com/chaseSpace/kit/parser"
-	"github.com/chaseSpace/kit/utils"
 	"github.com/spf13/viper"
+	"github.com/vanthaiunghoa/kit/parser"
+	"github.com/vanthaiunghoa/kit/utils"
 )
 
 func setDefaults() {

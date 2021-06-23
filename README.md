@@ -24,7 +24,7 @@ This is what `GoKit Cli` is aiming to change.
 # Installation
 Before you install please read [prerequisites](#prerequisites)
 ```bash
-go get -u github.com/chaseSpace/kit
+go get -u github.com/vanthaiunghoa/kit
 ```
 
 # Usage
@@ -90,7 +90,7 @@ go run hello/cmd/main.go
 ```bash
 kit g s hello -t grpc -p hello/pb -i hello/pb
 ```
-About more details, see also hello example [doc](https://github.com/chaseSpace/kit/blob/master/examples/hellosvc_doc.md).
+About more details, see also hello example [doc](https://github.com/vanthaiunghoa/kit/blob/master/examples/hellosvc_doc.md).
 
 # Generate the client library
 ```bash

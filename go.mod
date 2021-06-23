@@ -1,4 +1,4 @@
-module github.com/chaseSpace/kit
+module github.com/vanthaiunghoa/kit
 
 go 1.13
 

@@ -5,12 +5,12 @@ import (
 	"path"
 	"strings"
 
-	"github.com/chaseSpace/kit/fs"
-	"github.com/chaseSpace/kit/parser"
-	"github.com/chaseSpace/kit/utils"
 	"github.com/dave/jennifer/jen"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/vanthaiunghoa/kit/fs"
+	"github.com/vanthaiunghoa/kit/parser"
+	"github.com/vanthaiunghoa/kit/utils"
 )
 
 // SupportedTransports is an array containing the supported transport types.
